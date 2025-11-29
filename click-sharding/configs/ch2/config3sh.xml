@@ -1,0 +1,35 @@
+<yandex>
+    <zookeeper>
+        <node index="1">
+            <host>zk</host>
+            <port>2181</port>
+        </node>
+    </zookeeper>
+
+    <remote_servers>
+        <cluster_3sh>
+            <shard>
+                <replica>
+                    <host>ch1</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+            <shard>
+                <replica>
+                    <host>ch2</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+            <shard>
+                <replica>
+                    <host>ch3</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </cluster_3sh>
+    </remote_servers>
+
+    <http_port>8123</http_port>
+    <tcp_port>9000</tcp_port>
+    <interserver_http_port>9009</interserver_http_port>
+</yandex>

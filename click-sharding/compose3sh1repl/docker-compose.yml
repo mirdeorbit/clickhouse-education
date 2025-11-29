@@ -1,0 +1,65 @@
+services:
+  zk:
+    image: zookeeper
+    restart: always
+    container_name: zk
+    hostname: zk
+    ports:
+      - 2181:2181
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=zk:2888:3888;2181
+
+  ch1:
+    image: clickhouse/clickhouse-server:latest
+    container_name: ch1
+    hostname: ch1
+    restart: always
+    ports:
+      - 9001:9000
+      - 8124:8123
+    environment:
+      CLICKHOUSE_USER: 'default'
+      CLICKHOUSE_PASSWORD: ''
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - ../ch1:/var/lib/clickhouse
+      - ../configs/ch1/config3sh.xml:/etc/clickhouse-server/conf.d/config.xml
+    depends_on:
+      - zk
+
+  ch2:
+    image: clickhouse/clickhouse-server:latest
+    container_name: ch2
+    hostname: ch2
+    restart: always
+    ports:
+      - 9002:9000
+      - 8125:8123
+    environment:
+      CLICKHOUSE_USER: 'default'
+      CLICKHOUSE_PASSWORD: ''
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - ../ch2:/var/lib/clickhouse
+      - ../configs/ch2/config3sh.xml:/etc/clickhouse-server/conf.d/config.xml
+    depends_on:
+      - zk
+
+  ch3:
+    image: clickhouse/clickhouse-server:latest
+    container_name: ch3
+    hostname: ch3
+    restart: always
+    ports:
+      - 9003:9000
+      - 8126:8123
+    environment:
+      CLICKHOUSE_USER: 'default'
+      CLICKHOUSE_PASSWORD: ''
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - ../ch3:/var/lib/clickhouse
+      - ../configs/ch3/config3sh.xml:/etc/clickhouse-server/conf.d/config.xml
+    depends_on:
+      - zk
