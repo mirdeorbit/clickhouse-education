@@ -1,0 +1,24 @@
+<clickhouse>
+    <storage_configuration>
+      <disks>
+        <s3_disk>
+          <path>/var/lib/clickhouse/disks/s3/</path>
+          <object_disk_path>/var/lib/clickhouse/disks/s3_object/</object_disk_path>
+          <endpoint>http://minio:9000/ch-backups</endpoint>
+          <access_key_id>admin</access_key_id>
+          <secret_access_key>password123</secret_access_key>
+          <metadata_path>/var/lib/clickhouse/disks/s3_meta/</metadata_path>
+        </s3_disk>
+      </disks>
+  
+      <policies>
+        <s3_policy>
+          <volumes>
+            <main>
+              <disk>s3_disk</disk>
+            </main>
+          </volumes>
+        </s3_policy>
+      </policies>
+    </storage_configuration>
+  </clickhouse>

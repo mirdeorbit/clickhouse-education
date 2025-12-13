@@ -1,0 +1,12 @@
+general:
+  remote_storage: s3
+
+clickhouse:
+  host: localhost
+  port: 9000
+
+s3:
+  endpoint: http://minio:9000/ch-backups
+  access_key: admin
+  secret_key: password123
+  region: us-east-1
