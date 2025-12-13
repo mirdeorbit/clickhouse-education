@@ -4,6 +4,10 @@ general:
 clickhouse:
   host: localhost
   port: 9000
+  skip_tables:
+    - system.*
+    - INFORMATION_SCHEMA.*
+    - information_schema.*
 
 s3:
   endpoint: http://minio:9000/ch-backups
