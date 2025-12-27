@@ -14,4 +14,5 @@ click-etl/logs/
 click-etl/plugins/
 click-etl/sources/
 click-etl/dags/__pycache__/
+click-kafka/ch_data/
 .DS_Store

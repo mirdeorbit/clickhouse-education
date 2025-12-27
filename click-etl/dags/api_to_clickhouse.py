@@ -25,12 +25,3 @@ with DAG(
         task_id='load_api_data_task',
         python_callable=load_data,
     )
-
-# with DAG(
-#         dag_id='load_api_data',
-#         start_date=days_ago(2)
-# ) as dag:
-#     dag >> PythonOperator(
-#         task_id='load_api_data',
-#         python_callable=load_data,
-#     )
