@@ -268,12 +268,14 @@ services:
     ports:
       - "8123:8123"
       - "9001:9001"
+      - "8443:8443"
     environment:
       CLICKHOUSE_USER: 'default'
       CLICKHOUSE_PASSWORD: ''
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
     volumes:
       - ./ch_data:/var/lib/clickhouse
+      - ./ch-config/config.xml:/etc/clickhouse-server/conf.d/config.xml
 
 volumes:
   superset_home:
