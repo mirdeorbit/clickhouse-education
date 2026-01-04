@@ -15,4 +15,6 @@ click-etl/plugins/
 click-etl/sources/
 click-etl/dags/__pycache__/
 click-kafka/ch_data/
+click-superset/*
+!click-superset/docker-compose.yml
 .DS_Store
