@@ -19,4 +19,6 @@ click-superset/*
 !click-superset/docker-compose.yml
 !click-superset/ch-config
 !click-superset/docker/requirements-local
+click-postgres/ch_data/
+click-postgres/pg_data/
 .DS_Store

@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - ./ch_data:/var/lib/clickhouse
+    environment:
+      CLICKHOUSE_USER: 'default'
+      CLICKHOUSE_PASSWORD: ''
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    shm_size: 128mb
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pg_data:/var/lib/postgresql
+    environment:
+      POSTGRES_PASSWORD: somepassword
