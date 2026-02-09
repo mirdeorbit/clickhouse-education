@@ -1,0 +1,3 @@
+global:
+  wal_user: "wal_reader"
+  wal_password: "super_secret_password"

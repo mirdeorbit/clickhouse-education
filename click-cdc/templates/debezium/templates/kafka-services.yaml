@@ -1,0 +1,46 @@
+---
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaNodePool
+metadata:
+  name: kafka-debezium-node-pool
+  namespace: default
+  labels:
+    strimzi.io/cluster: kafka-debezium-cluster
+spec:
+  replicas: {{ .Values.node_pool_replicas_count }}
+  roles:
+    - broker
+    - controller
+  storage:
+    type: ephemeral
+
+---
+apiVersion: kafka.strimzi.io/v1
+kind: Kafka
+metadata:
+  name: kafka-debezium-cluster
+  namespace: default
+  annotations:
+    strimzi.io/node-pools: enabled
+    strimzi.io/kraft: enabled
+spec:
+  kafka:
+    version: "4.1.1"
+    listeners:
+      - port: {{ .Values.listeners.plain.port }}
+        tls: {{ .Values.listeners.plain.tls }}
+        type: {{ .Values.listeners.plain.type }}
+        name: plain
+      - port: {{ .Values.listeners.tls.port }}
+        tls: {{ .Values.listeners.tls.tls }}
+        type: {{ .Values.listeners.tls.type }}
+        name: tls
+      - port: {{ .Values.listeners.external.port }}
+        tls: {{ .Values.listeners.external.tls }}
+        type: {{ .Values.listeners.external.type }}
+        name: external
+    config:
+{{ toYaml .Values.config | indent 6}}
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}

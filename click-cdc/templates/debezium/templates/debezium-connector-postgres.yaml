@@ -1,0 +1,20 @@
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaConnector
+metadata:
+  name: debezium-connector-postgres
+  labels:
+    strimzi.io/cluster: debezium-connect-cluster
+spec:
+  class: io.debezium.connector.postgresql.PostgresConnector
+  tasksMax: 1
+  config:
+    tasks.max: 1
+    database.hostname: postgres-0
+    database.port: 5432
+    database.user: wal_reader
+    database.password: wal_reader_password123
+    database.server.id: 184054
+    topic.prefix: postgres
+    database.include.list: public
+    schema.history.internal.kafka.bootstrap.servers: {{.Values.listeners.plain.host}}:{{.Values.listeners.plain.port}}
+    schema.history.internal.kafka.topic: schema-changes.public
