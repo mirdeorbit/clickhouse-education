@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-initdb
+data:
+  initdb.sql: |
+{{ .Files.Get "sql/create_delivery.sql" | nindent 4 }}

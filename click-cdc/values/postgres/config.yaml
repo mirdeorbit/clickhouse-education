@@ -13,48 +13,20 @@ postgresql:
       allowInsecureImages: true
 
   auth:
-    postgresPassword: "some_postgres_password123"
+    postgresPassword: "pass123"
     username: "wal_reader"
     password: "wal_reader_password123"
 
   primary:
-    configuration: |
-      listen_addresses = '*'
-      port = '5432'
-      max_connections = '25000'
-      wal_level = 'logical'
-      fsync = 'on'
-      max_wal_size = '400MB'
-      archive_mode = 'on'
-      archive_command = '/bin/true'
-      max_wal_senders = 1
-      max_replication_slots = 1
-      logging_collector = 'on'
-      log_directory = '/opt/bitnami/postgresql/logs'
-      log_filename = 'postgresql.log'
-      log_connections = 'false'
-      log_disconnections = 'false'
-      log_hostname = 'true'
-      client_min_messages = 'error'
-      include_dir = 'conf.d'
-      pgaudit.log_catalog = 'off'
-      hot_standby = 'off'
-      shared_preload_libraries = 'decoderbufs'
-    pgHbaConfiguration: |
-      local all all scram-sha-256
-      host all all 0.0.0.0/0 scram-sha-256
-      host replication wal_reader 0.0.0.0/0 scram-sha-256
+    existingConfigmap: "postgres-config"
     containerSecurityContext:
       runAsNonRoot: false
       readOnlyRootFilesystem: false
     initdb:
       # postgresqlWalDir: "/bitnami/postgresql/data/pg_wal"
       user: postgres
-      password: "some_postgres_password123"
-      scripts:
-        setup.sql: |
-          ALTER USER wal_reader WITH REPLICATION;
-          CREATE TABLE "some" (title TEXT, description TEXT );
+      password: "pass123"
+      scriptsConfigMap: "postgres-initdb"
     resources:
       requests:
         cpu: 2

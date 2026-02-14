@@ -8,13 +8,17 @@ spec:
   class: io.debezium.connector.postgresql.PostgresConnector
   tasksMax: 1
   config:
-    tasks.max: 1
-    database.hostname: postgres-0
+    key.converter: "org.apache.kafka.connect.json.JsonConverter"
+    key.converter.schemas.enable: false
+    value.converter: "org.apache.kafka.connect.json.JsonConverter"
+    value.converter.schemas.enable: false
+    database.hostname: "postgres"
     database.port: 5432
-    database.user: wal_reader
-    database.password: wal_reader_password123
+    database.dbname: "delivery"
+    database.user: "wal_reader"
+    database.password: "wal_reader_password123"
     database.server.id: 184054
-    topic.prefix: postgres
-    database.include.list: public
-    schema.history.internal.kafka.bootstrap.servers: {{.Values.listeners.plain.host}}:{{.Values.listeners.plain.port}}
-    schema.history.internal.kafka.topic: schema-changes.public
+    topic.prefix: "postgres"
+    schema.include.list: "public"
+    snapshot.mode: "no_data"
+    table.include.list: {{ .Values.tablesList }}

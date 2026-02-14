@@ -19,7 +19,21 @@ listeners:
     type: nodeport
     tls: false
 
+tablesList: >
+  public.polygons,
+  public.shops,
+  public.couriers,
+  public.pickers,
+  public.products,
+  public.orders,
+  public.order_products,
+  public.work_shifts
+
 config:
+  # разобраться с партициями и репликами
+  topic.creation.enable: true
+  topic.creation.default.replication.factor: 2
+  topic.creation.default.partitions: 2
   offsets.topic.replication.factor: 3
   transaction.state.log.replication.factor: 3
   transaction.state.log.min.isr: 2

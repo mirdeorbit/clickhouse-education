@@ -1,10 +1,9 @@
-DO $$
-BEGIN
-   IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'delivery') THEN
-      CREATE DATABASE delivery;
-   END IF;
-END
-$$;
+ALTER USER wal_reader REPLICATION;
+CREATE ROLE replication_group REPLICATION LOGIN;
+GRANT REPLICATION_GROUP TO postgres;
+GRANT REPLICATION_GROUP TO wal_reader;
+
+CREATE DATABASE delivery;
 
 COMMENT ON DATABASE delivery IS 'База данных сервиса доставки заказов';
 
@@ -17,6 +16,9 @@ CREATE TABLE IF NOT EXISTS polygons (
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE polygons OWNER TO REPLICATION_GROUP;
+ALTER TABLE polygons REPLICA IDENTITY FULL;
 
 COMMENT ON TABLE polygons IS 'Зоны доставки (территории обслуживания)';
 COMMENT ON COLUMN polygons.id IS 'Уникальный идентификатор полигона';
@@ -32,13 +34,16 @@ CREATE TABLE IF NOT EXISTS shops (
     delivery_enabled BOOLEAN NOT NULL DEFAULT TRUE,
     start_work_time TIME NOT NULL,
     end_work_time TIME NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    polygon_id INTEGER,
 
-    CONSTRAINT fk_courier_polygon
+    CONSTRAINT fk_shops_polygon
         FOREIGN KEY (polygon_id) REFERENCES polygons(id)
         ON DELETE SET NULL
-
-    city VARCHAR(100) NOT NULL
 );
+
+ALTER TABLE shops OWNER TO REPLICATION_GROUP;
+ALTER TABLE shops REPLICA IDENTITY FULL;
 
 COMMENT ON TABLE shops IS 'Магазины, из которых осуществляется сборка и доставка заказов';
 COMMENT ON COLUMN shops.address IS 'Фактический адрес магазина';
@@ -61,12 +66,16 @@ CREATE TABLE IF NOT EXISTS couriers (
     company VARCHAR(255),
     self_employed BOOLEAN NOT NULL DEFAULT FALSE,
     timezone VARCHAR(50) NOT NULL,
-    polygon_id INTEGER
+    polygon_id INTEGER,
 
     CONSTRAINT fk_courier_polygon
         FOREIGN KEY (polygon_id) REFERENCES polygons(id)
         ON DELETE SET NULL
 );
+
+ALTER TABLE couriers OWNER TO REPLICATION_GROUP;
+ALTER TABLE couriers REPLICA IDENTITY FULL;
+
 
 COMMENT ON TABLE couriers IS 'Курьеры службы доставки';
 COMMENT ON COLUMN couriers.first_name IS 'Имя курьера';
@@ -94,10 +103,14 @@ CREATE TABLE IF NOT EXISTS pickers (
     city VARCHAR(100) NOT NULL,
     timezone VARCHAR(50) NOT NULL,
     shop_id INTEGER,
+
     CONSTRAINT fk_picker_shop
         FOREIGN KEY (shop_id) REFERENCES shops(id)
         ON DELETE SET NULL
 );
+
+ALTER TABLE pickers OWNER TO REPLICATION_GROUP;
+ALTER TABLE pickers REPLICA IDENTITY FULL;
 
 COMMENT ON TABLE pickers IS 'Сборщики заказов в магазинах';
 COMMENT ON COLUMN pickers.status IS 'Статус: blocked / free / busy';
@@ -115,6 +128,9 @@ CREATE TABLE IF NOT EXISTS products (
     total_amount NUMERIC(10,3) NOT NULL CHECK (total_amount >= 0),
     discount_percent INTEGER DEFAULT 0 CHECK (discount_percent BETWEEN 0 AND 100)
 );
+
+ALTER TABLE products OWNER TO REPLICATION_GROUP;
+ALTER TABLE products REPLICA IDENTITY FULL;
 
 COMMENT ON TABLE products IS 'Товары магазина';
 COMMENT ON COLUMN products.amount_type IS 'Тип измерения: weight (вес) / items (штуки)';
@@ -160,6 +176,9 @@ CREATE TABLE IF NOT EXISTS orders (
         ON DELETE SET NULL
 );
 
+ALTER TABLE orders OWNER TO REPLICATION_GROUP;
+ALTER TABLE orders REPLICA IDENTITY FULL;
+
 COMMENT ON TABLE orders IS 'Заказы клиентов';
 COMMENT ON COLUMN orders.status IS 'Статус заказа: created → collecting → delivering → completed';
 COMMENT ON COLUMN orders.payment IS 'Оплачен ли заказ';
@@ -187,6 +206,9 @@ CREATE TABLE IF NOT EXISTS order_products (
         ON DELETE RESTRICT
 );
 
+ALTER TABLE order_products OWNER TO REPLICATION_GROUP;
+ALTER TABLE order_products REPLICA IDENTITY FULL;
+
 COMMENT ON TABLE order_products IS 'Состав заказа (товары внутри заказа)';
 COMMENT ON COLUMN order_products.amount IS 'Количестов товара в заказе';
 COMMENT ON COLUMN order_products.price IS 'Цена товара на момент добавления в заказ';
@@ -207,6 +229,9 @@ CREATE TABLE IF NOT EXISTS work_shifts (
         FOREIGN KEY (courier_id) REFERENCES couriers(id)
         ON DELETE CASCADE
 );
+
+ALTER TABLE work_shifts OWNER TO REPLICATION_GROUP;
+ALTER TABLE work_shifts REPLICA IDENTITY FULL;
 
 COMMENT ON TABLE work_shifts IS 'Смены курьеров';
 COMMENT ON COLUMN work_shifts.status IS 'Статус смены: planned / active / closed';

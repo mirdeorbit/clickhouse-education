@@ -21,4 +21,5 @@ click-superset/*
 !click-superset/docker/requirements-local
 click-postgres/ch_data/
 click-postgres/pg_data/
+click-cdc/**/*.tgz
 .DS_Store
