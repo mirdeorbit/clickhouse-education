@@ -24,10 +24,22 @@ tablesList: >
   public.shops,
   public.couriers,
   public.pickers,
+  public.clients,
   public.products,
   public.orders,
   public.order_products,
   public.work_shifts
+
+topic2tableMap: >
+  postgres.delivery.public.polygons=postgres_delivery_public_polygons,
+  postgres.delivery.public.shops=postgres_delivery_public_shops,
+  postgres.delivery.public.couriers=postgres_delivery_public_couriers,
+  postgres.delivery.public.pickers=postgres_delivery_public_pickers,
+  postgres.delivery.public.clients=postgres_delivery_public_clients,
+  postgres.delivery.public.products=postgres_delivery_public_products,
+  postgres.delivery.public.orders=postgres_delivery_public_orders,
+  postgres.delivery.public.order_products=postgres_delivery_public_order_products,
+  postgres.delivery.public.work_shifts=postgres_delivery_public_work_shifts
 
 config:
   # разобраться с партициями и репликами

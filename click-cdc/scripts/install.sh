@@ -36,6 +36,12 @@ fi
 PARENT_DIR_NAME=$(basename $(dirname $PWD))
 MINIKUBE_HOME=${PARENT_DIR_NAME}/config/kube
 
+echo "Removing cluster..."
+
+minikube delete
+
+echo "Starting cluster..."
+
 minikube start
 
 helm install strimzi-cluster-operator oci://quay.io/strimzi-helm/strimzi-kafka-operator

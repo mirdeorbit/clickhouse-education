@@ -12,13 +12,13 @@ spec:
     key.converter.schemas.enable: false
     value.converter: "org.apache.kafka.connect.json.JsonConverter"
     value.converter.schemas.enable: false
-    database.hostname: "postgres"
+    database.hostname: {{ .Values.postgresql.fullNameOverride }}
     database.port: 5432
-    database.dbname: "delivery"
-    database.user: "wal_reader"
-    database.password: "wal_reader_password123"
+    database.dbname: delivery
+    database.user: {{ .Values.postgresql.auth.username }}
+    database.password: {{ .Values.postgresql.auth.password }}
     database.server.id: 184054
-    topic.prefix: "postgres"
-    schema.include.list: "public"
-    snapshot.mode: "no_data"
+    topic.prefix: postgres.delivery
+    schema.include.list: public
+    snapshot.mode: no_data
     table.include.list: {{ .Values.tablesList }}

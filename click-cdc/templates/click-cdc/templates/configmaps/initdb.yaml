@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-initdb
+data:
+  init_cdc.sql: |
+{{ .Files.Get "sql/create_cdc.sql" | nindent 4 }}
+  init_ods.sql: |
+{{ .Files.Get "sql/create_ods.sql" | nindent 4 }}

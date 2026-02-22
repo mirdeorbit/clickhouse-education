@@ -1,0 +1,44 @@
+cdcDatabase:
+  name: cdc
+
+authCredentials:
+  username: &authCredentialsUsername click_admin
+  password: &authCredentialsPassword click_admin_password123
+
+clickhouse:
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/clickhouse
+    tag: 25.7.5-debian-12-r0
+  nameOverride: "clickhouse"
+  fullNameOverride: "clickhouse"
+  shards: 1
+  replicaCount: 2
+  clusterName: click-cdc
+  keeper:
+    nameOverride: "keeper"
+    fullNameOverride: "keeper"
+    replicaCount: 1
+    image:
+      registry: docker.io
+      repository: bitnamilegacy/clickhouse-keeper
+      tag: 25.7.5-debian-12-r0
+  containerPorts:
+    http: 8123
+  auth:
+    username: *authCredentialsUsername
+    password: *authCredentialsPassword
+  startdbScripts:
+    init_cdc.sh: |
+      #!/bin/bash
+      clickhouse-client -u {{ .Values.auth.username }} --password {{ .Values.auth.password }} --multiquery < /docker-entrypoint-initdb.d/initdb/init_cdc.sql
+    init_ods.sh: |
+      #!/bin/bash
+      clickhouse-client -u {{ .Values.auth.username }} --password {{ .Values.auth.password }} --multiquery < /docker-entrypoint-initdb.d/initdb/init_ods.sql
+  extraVolumeMounts:
+    - name: clickhouse-initdb
+      mountPath: /docker-entrypoint-initdb.d/initdb
+  extraVolumes:
+    - name: clickhouse-initdb
+      configMap:
+        name: clickhouse-initdb

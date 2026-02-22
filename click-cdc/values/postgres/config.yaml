@@ -1,7 +1,7 @@
 
 postgresql:
-  nameOverride: "postgres"
-  fullNameOverride: "postgres"
+  nameOverride: postgres
+  fullNameOverride: postgres
 
   image:
     debug: true
@@ -13,9 +13,9 @@ postgresql:
       allowInsecureImages: true
 
   auth:
-    postgresPassword: "pass123"
-    username: "wal_reader"
-    password: "wal_reader_password123"
+    postgresPassword: pass123
+    username: wal_reader
+    password: wal_reader_password123
 
   primary:
     existingConfigmap: "postgres-config"
@@ -23,10 +23,9 @@ postgresql:
       runAsNonRoot: false
       readOnlyRootFilesystem: false
     initdb:
-      # postgresqlWalDir: "/bitnami/postgresql/data/pg_wal"
       user: postgres
-      password: "pass123"
-      scriptsConfigMap: "postgres-initdb"
+      password: pass123
+      scriptsConfigMap: postgres-initdb
     resources:
       requests:
         cpu: 2
@@ -34,5 +33,3 @@ postgresql:
       limits:
         cpu: 4
         memory: 4Gi
-    readinessProbe:
-      enabled: false

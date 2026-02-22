@@ -1,0 +1,26 @@
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaConnector
+metadata:
+  name: debezium-connector-clickhouse
+  labels:
+    strimzi.io/cluster: debezium-connect-cluster
+spec:
+  class: com.clickhouse.kafka.connect.ClickHouseSinkConnector
+  tasksMax: 1
+  config:
+    hostname: click-cdc-{{ .Values.clickhouse.fullNameOverride }}-headless.default.svc
+    port: 8443
+    schemas.enable: false
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: false
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: false
+    topics.regex: "^postgres.*"
+    username: {{ .Values.authCredentials.username }}
+    password: {{ .Values.authCredentials.password }}
+    port: {{ .Values.clickhouse.containerPorts.http }}
+    database: {{ .Values.cdcDatabase.name }}
+    topic2TableMap: {{ .Values.topic2tableMap }}
+    transforms: flatten
+    transforms.flatten.type: org.apache.kafka.connect.transforms.Flatten$Value
+    transforms.flatten.delimiter: "."
