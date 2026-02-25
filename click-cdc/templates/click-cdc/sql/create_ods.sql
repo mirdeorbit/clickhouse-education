@@ -182,9 +182,9 @@ SELECT
     coalesce(`after.id`, `before.id`) as id,
     coalesce(`after.title`, `before.title`) as title,
     coalesce(`after.amount_type`, `before.amount_type`) as amount_type,
-    coalesce(`after.price_for_amount_item`, `before.price_for_amount_item`) as price_for_amount_item,
+    CAST(coalesce(`after.price_for_amount_item`, `before.price_for_amount_item`) as Decimal(10, 2)) as price_for_amount_item,
     coalesce(`after.valid_hours`, `before.valid_hours`) as valid_hours,
-    coalesce(`after.total_amount`, `before.total_amount`) as total_amount,
+    CAST(coalesce(`after.total_amount`, `before.total_amount`) as Decimal(10, 3)) as total_amount,
     coalesce(`after.discount_percent`, `before.discount_percent`) as discount_percent,
     toDateTime64(coalesce(`after.created_at`, `before.created_at`) / 1e6, 3) AS created_at,
     op = 'd' as is_deleted,
@@ -295,8 +295,8 @@ AS
 SELECT
     coalesce(`after.order_id`, `before.order_id`) AS order_id,
     coalesce(`after.product_id`, `before.product_id`) AS product_id,
-    coalesce(`after.amount`, `before.amount`) AS amount,
-    coalesce(`after.price`, `before.price`) AS price,
+    CAST(coalesce(`after.amount`, `before.amount`) as Decimal(10, 3)) AS amount,
+    CAST(coalesce(`after.price`, `before.price`) as Decimal(10, 2)) AS price,
 
     op = 'd' AS is_deleted,
     ts_ms

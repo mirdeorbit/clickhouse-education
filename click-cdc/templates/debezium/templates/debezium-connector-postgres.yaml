@@ -22,3 +22,4 @@ spec:
     schema.include.list: public
     snapshot.mode: no_data
     table.include.list: {{ .Values.tablesList }}
+    decimal.handling.mode: string

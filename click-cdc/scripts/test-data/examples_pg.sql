@@ -25,11 +25,11 @@ VALUES
 ('Maria', 'Volkova', NULL, '+79990000103', 'maria@mail.ru', 'blocked', 'otus_logistics', 'Saint Petersburg', 'Europe/Moscow', 3);
 
 
-INSERT INTO products ( title, amount_type, price_for_amount_item, date, valid_hours, total_amount, discount_percent)
+INSERT INTO products ( title, amount_type, price_for_amount_item, valid_hours, total_amount, discount_percent)
 VALUES
-('Apples', 'weight', 120.50, CURRENT_DATE, 48, 100.000, 10),
-('Milk 1L', 'items', 89.90, CURRENT_DATE, 72, 50.000, 0),
-('Bananas', 'weight', 95.00, CURRENT_DATE, 36, 200.000, 5);
+('Apples', 'weight', 120.50, 48, 100.000, 10),
+('Milk 1L', 'items', 89.90, 72, 50.000, 0),
+('Bananas', 'weight', 95.00, 36, 200.000, 5);
 
 
 INSERT INTO clients (id, full_name, phone, address)
