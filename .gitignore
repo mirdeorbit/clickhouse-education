@@ -22,4 +22,5 @@ click-superset/*
 click-postgres/ch_data/
 click-postgres/pg_data/
 click-cdc/**/*.tgz
+click-cdc/scripts/test-data/seeds/node_modules/
 .DS_Store
