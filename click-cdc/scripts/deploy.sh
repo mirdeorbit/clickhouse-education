@@ -12,6 +12,9 @@ PG_VALUES="-f ../values/postgres/config.yaml"
 CLICK_VALUES="-f ../values/click-cdc/config.yaml"
 KAFKA_VALUES="-f ../values/debezium/config.yaml"
 
+STRIMZI_VERSION="0.51.0"
+KAFKA_VERSION="4.1.1"
+
 prev=""
 
 for arg in "$@"; do
@@ -81,12 +84,16 @@ install_postgres() {
 install_cdc() {
   ./update_chart_version.sh ../templates/click-cdc
   retry 3 5 helm dependency build ../templates/click-cdc
-  retry 3 5 helm upgrade --install click-cdc ../templates/click-cdc $CLICK_VALUES
+  retry 3 5 helm upgrade --install click-cdc ../templates/click-cdc $CLICK_VALUES $KAFKA_VALUES
 }
 
 install_debezium() {
   ./update_chart_version.sh ../templates/debezium
   retry 3 5 helm upgrade --install debezium ../templates/debezium $PG_VALUES $CLICK_VALUES $KAFKA_VALUES
+}
+
+install_operator() {
+  helm upgrade --install strimzi-cluster-operator oci://quay.io/strimzi-helm/strimzi-kafka-operator --set defaultImageTag=${STRIMZI_VERSION} --version ${STRIMZI_VERSION}
 }
 
 if $UNINSTALL_ALL; then
@@ -105,6 +112,7 @@ for target in "${TARGETS[@]}"; do
     postgres) install_postgres ;;
     click-cdc) install_cdc ;;
     debezium) install_debezium ;;
+    operator) install_operator ;;
     *)
       echo "Unknown target: $target"
       exit 1

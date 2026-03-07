@@ -7,3 +7,9 @@ data:
 {{ .Files.Get "sql/create_cdc.sql" | nindent 4 }}
   init_ods.sql: |
 {{ .Files.Get "sql/create_ods.sql" | nindent 4 }}
+  init_clients.sql: |
+{{- tpl (.Files.Get "sql/create_clients.sql") . | nindent 4 }}
+  init_clients_mvs.sql: |
+{{- tpl (.Files.Get "sql/create_clients_mvs.sql") . | nindent 4 }}
+  init_metrics.sql: |
+{{- tpl (.Files.Get "sql/create_metrics.sql") . | nindent 4 }} 

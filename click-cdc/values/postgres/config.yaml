@@ -7,6 +7,7 @@ postgresql:
     debug: true
     repository: mirdeorbit/postgres-custom
     tag: "1.0"
+    pullPolicy: Never
 
   global:
     security:
@@ -26,6 +27,11 @@ postgresql:
       user: postgres
       password: pass123
       scriptsConfigMap: postgres-initdb
+    service:
+      ports:
+        postgresql: 5432
+      nodePorts:
+        postgresql: 5432
     resources:
       requests:
         cpu: 2

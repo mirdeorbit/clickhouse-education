@@ -1,5 +1,9 @@
 node_pool_replicas_count: 3
 
+strimzi:
+  kafka:
+    version: 4.1.1
+
 listeners:
   plain:
     host: kafka-debezium-cluster-kafka-bootstrap.default.svc
@@ -30,16 +34,34 @@ tablesList: >
   public.order_products,
   public.work_shifts
 
-topic2tableMap: >
-  postgres.delivery.public.polygons=postgres_delivery_public_polygons,
-  postgres.delivery.public.shops=postgres_delivery_public_shops,
-  postgres.delivery.public.couriers=postgres_delivery_public_couriers,
-  postgres.delivery.public.pickers=postgres_delivery_public_pickers,
-  postgres.delivery.public.clients=postgres_delivery_public_clients,
-  postgres.delivery.public.products=postgres_delivery_public_products,
-  postgres.delivery.public.orders=postgres_delivery_public_orders,
-  postgres.delivery.public.order_products=postgres_delivery_public_order_products,
-  postgres.delivery.public.work_shifts=postgres_delivery_public_work_shifts
+topic2tableMap:
+  cdc: >
+    postgres.delivery.public.polygons=postgres_delivery_public_polygons,
+    postgres.delivery.public.shops=postgres_delivery_public_shops,
+    postgres.delivery.public.couriers=postgres_delivery_public_couriers,
+    postgres.delivery.public.pickers=postgres_delivery_public_pickers,
+    postgres.delivery.public.clients=postgres_delivery_public_clients,
+    postgres.delivery.public.products=postgres_delivery_public_products,
+    postgres.delivery.public.orders=postgres_delivery_public_orders,
+    postgres.delivery.public.order_products=postgres_delivery_public_order_products,
+    postgres.delivery.public.work_shifts=postgres_delivery_public_work_shifts
+  clients: >
+    delivery.polygons.events=delivery_polygons_events,
+    delivery.shops.events=delivery_shops_events,
+    delivery.couriers.events=delivery_couriers_events,
+    delivery.pickers.events=delivery_pickers_events,
+    delivery.products.events=delivery_products_events,
+    delivery.clients.events=delivery_clients_events,
+    delivery.orders.events=delivery_orders_events,
+    delivery.order_products.events=delivery_order_products_events,
+    delivery.work_shifts.events=delivery_work_shifts_events
+
+topics:
+  clients: >
+    delivery.polygons.events,
+    delivery.shops.events,
+    delivery.couriers.events,
+    delivery.pickers.events
 
 config:
   # разобраться с партициями и репликами

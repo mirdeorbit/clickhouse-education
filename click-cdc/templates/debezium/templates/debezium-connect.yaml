@@ -6,9 +6,13 @@ metadata:
   annotations:
     strimzi.io/use-connector-resources: "true"
 spec:
-  version: 4.1.1
-  image: docker.io/mirdeorbit/debezium-connect:1.4
+  image: docker.io/mirdeorbit/debezium-connect:1.7.10
   replicas: 1
+  resources:
+    limits:
+      memory: 2Gi
+    requests:
+      memory: 1Gi
   bootstrapServers: {{.Values.listeners.plain.host}}:{{.Values.listeners.plain.port}}
   groupId: connect-cluster
   offsetStorageTopic: connect-cluster-offsets
@@ -17,8 +21,10 @@ spec:
   logging:
     type: inline
     loggers:
-      rootLogger.level: WARN
-      logger.reflections.level: WARN
+      rootLogger.level: INFO
+      logger.kafka.level: DEBUG
+      logger.logcleaner.level: DEBUG
+      logger.authorizer.level: TRACE
   config:
     config.providers: secrets
     config.providers.secrets.class: io.strimzi.kafka.KubernetesSecretConfigProvider

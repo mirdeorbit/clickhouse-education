@@ -13,6 +13,11 @@ spec:
     - controller
   storage:
     type: ephemeral
+  resources:
+    requests:
+      memory: 1Gi
+    limits:
+      memory: 2Gi
 
 ---
 apiVersion: kafka.strimzi.io/v1
@@ -25,7 +30,7 @@ metadata:
     strimzi.io/kraft: enabled
 spec:
   kafka:
-    version: "4.1.1"
+    version: {{ .Values.strimzi.kafka.version }}
     listeners:
       - port: {{ .Values.listeners.plain.port }}
         tls: {{ .Values.listeners.plain.tls }}
@@ -42,5 +47,10 @@ spec:
     config:
 {{ toYaml .Values.config | indent 6}}
   entityOperator:
-    topicOperator: {}
+    topicOperator:
+      resources:
+        requests:
+          memory: 1Gi
+        limits:
+          memory: 2Gi
     userOperator: {}

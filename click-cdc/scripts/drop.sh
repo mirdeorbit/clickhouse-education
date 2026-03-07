@@ -24,6 +24,10 @@ uninstall_cdc() {
   kubectl delete pvc data-click-cdc-clickhouse-shard0-1 | true
 }
 
+uninstall_operator() {
+  helm delete strimzi-cluster-operator | true 
+}
+
 uninstall_debezium() {
   helm delete debezium | true
 }
@@ -33,6 +37,7 @@ for target in "${TARGETS[@]}"; do
     postgres) uninstall_postgres ;;
     click-cdc) uninstall_cdc ;;
     debezium) uninstall_debezium ;;
+    operator) uninstall_operator ;;
     *)
       echo "Unknown target: $target"
       exit 1

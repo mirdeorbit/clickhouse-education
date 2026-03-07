@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS cdc.postgres_delivery_public_polygons
 )
 ENGINE = ReplicatedMergeTree('/cdc/tables/{shard}/{database}/postgres_delivery_public_polygons', 'replica_{replica}')
 ORDER BY tuple()
+TTL toDateTime(ts_ms/1000) + INTERVAL 7 DAY
 COMMENT 'CDC source data table for topic postgres.public.polygons';
 
 

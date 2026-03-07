@@ -1,15 +1,25 @@
 cdcDatabase:
   name: cdc
+clientsDatabase:
+  name: clients
 
 authCredentials:
   username: &authCredentialsUsername click_admin
   password: &authCredentialsPassword click_admin_password123
+
+kafkaServer: kafka-debezium-cluster-kafka-bootstrap.default.svc:9092
 
 clickhouse:
   image:
     registry: docker.io
     repository: bitnamilegacy/clickhouse
     tag: 25.7.5-debian-12-r0
+    pullPolicy: Never
+  resources:
+    limits:
+      memory: 4Gi
+    requests:
+      memory: 2Gi
   nameOverride: "clickhouse"
   fullNameOverride: "clickhouse"
   shards: 1
@@ -31,10 +41,24 @@ clickhouse:
   startdbScripts:
     init_cdc.sh: |
       #!/bin/bash
+      echo "Creating cdc database..."
       clickhouse-client -u {{ .Values.auth.username }} --password {{ .Values.auth.password }} --multiquery < /docker-entrypoint-initdb.d/initdb/init_cdc.sql
     init_ods.sh: |
       #!/bin/bash
+      echo "Creating ODS database..."
       clickhouse-client -u {{ .Values.auth.username }} --password {{ .Values.auth.password }} --multiquery < /docker-entrypoint-initdb.d/initdb/init_ods.sql
+    init_clients.sh: |
+      #!/bin/bash
+      echo "Creating clients database..."
+      clickhouse-client -u {{ .Values.auth.username }} --password {{ .Values.auth.password }} --multiquery < /docker-entrypoint-initdb.d/initdb/init_clients.sql
+    init_clients_mvs.sh: |
+      #!/bin/bash
+      echo "Creating clients database MVs..."
+      clickhouse-client -u {{ .Values.auth.username }} --password {{ .Values.auth.password }} --multiquery < /docker-entrypoint-initdb.d/initdb/init_clients_mvs.sql
+    init_metrics.sh: |
+      #!/bin/bash
+      echo "Creating metrics database..."
+      clickhouse-client -u {{ .Values.auth.username }} --password {{ .Values.auth.password }} --multiquery < /docker-entrypoint-initdb.d/initdb/init_metrics.sql
   extraVolumeMounts:
     - name: clickhouse-initdb
       mountPath: /docker-entrypoint-initdb.d/initdb

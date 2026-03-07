@@ -1,20 +1,37 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 echo "Exec query..."
 
-QUERY=$@
+if [[ $# -lt 1 || $# -gt 2 ]]; then
+  echo "Usage:"
+  echo "  $0 \"SQL_QUERY\" [0|1]"
+  exit 1
+fi
 
-echo "Replica 0: "
+QUERY="$1"
+TARGET="${2:-}"
 
-echo "$QUERY" | kubectl exec -i click-cdc-clickhouse-shard0-0 -- bash -c \
-"clickhouse-client -u click_admin --password click_admin_password123"
+run_query() {
+  local replica=$1
+  local pod="click-cdc-clickhouse-shard0-${replica}"
 
-printf '\n'
+  echo "Replica ${replica}:"
+  echo "$QUERY" | kubectl exec -i "$pod" -- bash -c \
+    "clickhouse-client -u click_admin --password click_admin_password123"
+  printf '\n'
+}
 
-echo "Replica 1: "
+# Если передана конкретная реплика
+if [[ -n "$TARGET" ]]; then
+  if [[ "$TARGET" != "0" && "$TARGET" != "1" ]]; then
+    echo "Replica must be 0 or 1"
+    exit 1
+  fi
 
-printf '\n'
-
-echo "$QUERY" | kubectl exec -i click-cdc-clickhouse-shard0-1 -- bash -c \
-"clickhouse-client -u click_admin --password click_admin_password123"
+  run_query "$TARGET"
+else
+  # Иначе выполняем на обеих
+  run_query 0
+  run_query 1
+fi
