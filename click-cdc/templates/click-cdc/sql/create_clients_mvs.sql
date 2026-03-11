@@ -1,3 +1,6 @@
+-- Материлизованные представления для таблиц KafkaEngine, которые будут отправлять только измененные значения данных клиентам
+-- Клиенты - приложения системы доставки, которые читают из топиков кафки и им нужны изменения данных из таблиц delivery
+
 CREATE MATERIALIZED VIEW IF NOT EXISTS clients.mv_delivery_polygons
 TO clients.delivery_polygons_events
 AS
@@ -31,6 +34,7 @@ SELECT
     diff_value(before.polygon_id, after.polygon_id, op) AS polygon_id,
     if(isNotNull(diff_value(before.created_at, after.created_at, op) as cr_at), toDateTime64(cr_at / 1e6, 3), NULL) AS created_at,
 
+    op = 'd' as is_deleted,
     ts_ms
 FROM cdc.postgres_delivery_public_shops
 WHERE op IN ('c','u', 'd');
@@ -63,6 +67,7 @@ SELECT
         NULL
     ) AS created_at,
 
+    op = 'd' as is_deleted,
     ts_ms
 FROM cdc.postgres_delivery_public_couriers
 WHERE op IN ('c','u','d');
@@ -92,6 +97,7 @@ SELECT
         NULL
     ) AS created_at,
 
+    op = 'd' as is_deleted,
     ts_ms
 FROM cdc.postgres_delivery_public_pickers
 WHERE op IN ('c','u','d');
@@ -118,6 +124,7 @@ SELECT
         NULL
     ) AS created_at,
 
+    op = 'd' as is_deleted,
     ts_ms
 FROM cdc.postgres_delivery_public_products
 WHERE op IN ('c','u','d');
@@ -140,6 +147,7 @@ SELECT
         NULL
     ) AS created_at,
 
+    op = 'd' as is_deleted,
     ts_ms
 FROM cdc.postgres_delivery_public_clients
 WHERE op IN ('c','u','d');
@@ -159,8 +167,6 @@ SELECT
     diff_value(before.picker_id, after.picker_id, op) AS picker_id,
     diff_value(before.courier_id, after.courier_id, op) AS courier_id,
     diff_value(before.payment, after.payment, op) AS payment,
-
-    -- даты
     if(
         isNotNull(diff_value(before.pay_date, after.pay_date, op) as pay_dt),
         toDateTime64(pay_dt / 1e6, 3),
@@ -203,6 +209,7 @@ SELECT
         NULL
     ) AS completed_date,
 
+    op = 'd' as is_deleted,
     ts_ms
 FROM cdc.postgres_delivery_public_orders
 WHERE op IN ('c','u','d');
@@ -220,6 +227,7 @@ SELECT
     diff_value(before.amount, after.amount, op) AS amount,
     diff_value(before.price, after.price, op) AS price,
 
+    op = 'd' as is_deleted,
     ts_ms
 FROM cdc.postgres_delivery_public_order_products
 WHERE op IN ('c','u','d');
@@ -260,6 +268,7 @@ SELECT
         NULL
     ) AS created_at,
 
+    op = 'd' as is_deleted,
     ts_ms
 FROM cdc.postgres_delivery_public_work_shifts
 WHERE op IN ('c','u','d');

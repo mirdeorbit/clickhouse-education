@@ -16,6 +16,7 @@ spec:
     key.converter.schemas.enable: false
     value.converter: org.apache.kafka.connect.json.JsonConverter
     value.converter.schemas.enable: false
+    # Слушаем топики с таким префиксом
     topics.regex: "^postgres.*"
     username: {{ .Values.authCredentials.username }}
     password: {{ .Values.authCredentials.password }}
@@ -25,3 +26,17 @@ spec:
     transforms: flatten
     transforms.flatten.type: org.apache.kafka.connect.transforms.Flatten$Value
     transforms.flatten.delimiter: "."
+    # Пишем только один раз
+    exactlyOnce: true
+    # Объединяем ли сообщения из разных partition в один batch
+    ignorePartitionsWhenBatching: false
+    # Максимальное еоличесто записей, которое может быть передано в коннектор за один запрос
+    # один цикл чтения из Kafka даст максимум 10000 сообщений.
+    consumer.max.poll.records: 10000
+    # Максимальный размер данных, который консьюмер может получить из одной партиции за один fetch.
+    # Если сообщение больше — Kafka всё равно его отдаст.
+    consumer.max.partition.fetch.bytes: 5242880
+    # Kafka не отдаст данные, пока не накопится минимум 1MB сообщений.
+    consumer.fetch.min.bytes: 1048576
+    # Максимальное время ожидания Kafka, чтобы накопить fetch.min.bytes.
+    consumer.fetch.max.wait.ms: 500

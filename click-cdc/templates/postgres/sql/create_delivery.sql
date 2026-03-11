@@ -213,6 +213,7 @@ CREATE TABLE IF NOT EXISTS order_products (
     product_id INTEGER NOT NULL,
     amount NUMERIC(10,3) NOT NULL CHECK (amount > 0),
     price NUMERIC(10,2) NOT NULL CHECK (price >= 0),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 
     PRIMARY KEY (order_id, product_id),
 
@@ -242,7 +243,7 @@ CREATE TABLE IF NOT EXISTS work_shifts (
     close_reason VARCHAR(50) CHECK (
         close_reason IN ('successful_done', 'courier_didnt_come_out', 'cancelled_by_manager')
     ),
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_shift_courier
         FOREIGN KEY (courier_id) REFERENCES couriers(id)

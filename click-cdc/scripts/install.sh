@@ -37,21 +37,21 @@ PARENT_DIR_NAME=$(basename $(dirname $PWD))
 MINIKUBE_HOME=${PARENT_DIR_NAME}/config/kube
 
 echo "Starting cluster..."
-# minikube start
+minikube start
 
 STRIMZI_VERSION="0.51.0"
 KAFKA_VERSION="4.1.1"
 
-# echo "Pulling clickhouse images..."
-# minikube image load docker.io/bitnamilegacy/clickhouse:25.7.5-debian-12-r0
-# minikube image load docker.io/bitnamilegacy/clickhouse-keeper:25.7.5-debian-12-r0
+echo "Pulling clickhouse images..."
+minikube image load docker.io/bitnamilegacy/clickhouse:25.7.5-debian-12-r0
+minikube image load docker.io/bitnamilegacy/clickhouse-keeper:25.7.5-debian-12-r0
 
-# echo "Pulling postgres images..."
-# minikube image load registry-1.docker.io/mirdeorbit/postgres-custom:1.0
+echo "Pulling postgres images..."
+minikube image load registry-1.docker.io/mirdeorbit/postgres-custom:1.0
 
 echo "Pulling debezium images..."
-# minikube image load quay.io/strimzi/operator:${STRIMZI_VERSION}
-# minikube image load quay.io/strimzi/kafka:${STRIMZI_VERSION}-kafka-${KAFKA_VERSION}
+minikube image load quay.io/strimzi/operator:${STRIMZI_VERSION}
+minikube image load quay.io/strimzi/kafka:${STRIMZI_VERSION}-kafka-${KAFKA_VERSION}
 minikube image load docker.io/mirdeorbit/debezium-connect:1.7.10
 
 

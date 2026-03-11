@@ -1,4 +1,4 @@
-# connector for reading postgresql WAL and writing changes to kafka topics
+# Коннектор для чтения postgresql WAL и записи изменений в топики кафки
 apiVersion: kafka.strimzi.io/v1
 kind: KafkaConnector
 metadata:
@@ -20,7 +20,10 @@ spec:
     database.password: {{ .Values.postgresql.auth.password }}
     database.server.id: 184054
     topic.prefix: postgres.delivery
+    # Схемы, изменения которых слушаем
     schema.include.list: public
+    # параметр означает, что при первом запуске коннектора не будут отправлены данные, которые уже находились в базе, читаем только изменения
     snapshot.mode: no_data
     table.include.list: {{ .Values.tablesList }}
+    # В кафку дробные значения пишутся как строки
     decimal.handling.mode: string

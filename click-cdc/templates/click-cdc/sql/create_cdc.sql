@@ -20,8 +20,9 @@ CREATE TABLE IF NOT EXISTS cdc.postgres_delivery_public_polygons
 	`source.db` String
 )
 ENGINE = ReplicatedMergeTree('/cdc/tables/{shard}/{database}/postgres_delivery_public_polygons', 'replica_{replica}')
-ORDER BY tuple()
-TTL toDateTime(ts_ms/1000) + INTERVAL 7 DAY
+PARTITION BY toYYYYMMDD(toDateTime(ts_ms / 1e6)) -- Удаояем партиции по дням, за 7 дней всего 7 партиций. Удаляется по ttl вся партиция
+ORDER BY (ts_ms) -- Сообщения в порядке времени, меньше пересортировок, хорошо будет работать append
+TTL toDateTime(ts_ms / 1e6) + INTERVAL 7 DAY
 COMMENT 'CDC source data table for topic postgres.public.polygons';
 
 
@@ -54,7 +55,8 @@ ENGINE = ReplicatedMergeTree(
     '/cdc/tables/{shard}/{database}/postgres_delivery_public_shops',
     'replica_{replica}'
 )
-ORDER BY tuple()
+PARTITION BY toYYYYMMDD(toDateTime(ts_ms / 1e6))
+ORDER BY (ts_ms)
 COMMENT 'CDC source data table for topic postgres.public.shops';
 
 
@@ -99,7 +101,8 @@ ENGINE = ReplicatedMergeTree(
     '/cdc/tables/{shard}/{database}/postgres_delivery_public_couriers',
     'replica_{replica}'
 )
-ORDER BY tuple()
+PARTITION BY toYYYYMMDD(toDateTime(ts_ms / 1e6))
+ORDER BY (ts_ms)
 COMMENT 'CDC source data table for topic postgres.public.couriers';
 
 
@@ -140,7 +143,8 @@ ENGINE = ReplicatedMergeTree(
     '/cdc/tables/{shard}/{database}/postgres_delivery_public_pickers',
     'replica_{replica}'
 )
-ORDER BY tuple()
+PARTITION BY toYYYYMMDD(toDateTime(ts_ms / 1e6))
+ORDER BY (ts_ms)
 COMMENT 'CDC source data table for topic postgres.public.pickers';
 
 CREATE TABLE IF NOT EXISTS cdc.postgres_delivery_public_products
@@ -172,7 +176,8 @@ ENGINE = ReplicatedMergeTree(
     '/cdc/tables/{shard}/{database}/postgres_delivery_public_products',
     'replica_{replica}'
 )
-ORDER BY tuple()
+PARTITION BY toYYYYMMDD(toDateTime(ts_ms / 1e6))
+ORDER BY (ts_ms)
 COMMENT 'CDC source data table for topic postgres.public.products';
 
 
@@ -199,7 +204,8 @@ ENGINE = ReplicatedMergeTree(
     '/cdc/tables/{shard}/{database}/postgres_delivery_public_clients',
     'replica_{replica}'
 )
-ORDER BY tuple()
+PARTITION BY toYYYYMMDD(toDateTime(ts_ms / 1e6))
+ORDER BY (ts_ms)
 COMMENT 'CDC source data table for topic postgres.public.clients';
 
 
@@ -250,7 +256,8 @@ ENGINE = ReplicatedMergeTree(
     '/cdc/tables/{shard}/{database}/postgres_delivery_public_orders',
     'replica_{replica}'
 )
-ORDER BY tuple()
+PARTITION BY toYYYYMMDD(toDateTime(ts_ms / 1e6))
+ORDER BY (ts_ms)
 COMMENT 'CDC source data table for topic postgres.public.orders';
 
 
@@ -260,11 +267,13 @@ CREATE TABLE IF NOT EXISTS cdc.postgres_delivery_public_order_products
     `before.product_id` Nullable(UInt64),
     `before.amount` Nullable(String),
     `before.price` Nullable(String),
+    `before.created_at` Nullable(UInt64),
 
     `after.order_id` Nullable(UInt64),
     `after.product_id` Nullable(UInt64),
     `after.amount` Nullable(String),
     `after.price` Nullable(String),
+    `after.created_at` Nullable(UInt64),
 
     `op` LowCardinality(String),
     `ts_ms` UInt64,
@@ -275,7 +284,8 @@ ENGINE = ReplicatedMergeTree(
     '/cdc/tables/{shard}/{database}/postgres_delivery_public_order_products',
     'replica_{replica}'
 )
-ORDER BY tuple()
+PARTITION BY toYYYYMMDD(toDateTime(ts_ms / 1e6))
+ORDER BY (ts_ms)
 COMMENT 'CDC source data table for topic postgres.public.order_products';
 
 
@@ -308,5 +318,6 @@ ENGINE = ReplicatedMergeTree(
     '/cdc/tables/{shard}/{database}/postgres_delivery_public_work_shifts',
     'replica_{replica}'
 )
-ORDER BY tuple()
+PARTITION BY toYYYYMMDD(toDateTime(ts_ms / 1e6))
+ORDER BY (ts_ms)
 COMMENT 'CDC source data table for topic postgres.public.work_shifts';

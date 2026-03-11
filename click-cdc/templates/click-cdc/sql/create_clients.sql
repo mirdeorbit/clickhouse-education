@@ -1,6 +1,7 @@
 CREATE DATABASE IF NOT EXISTS clients
 COMMENT 'Delivery kafka changes database';
 
+-- Функция, которая определяет изменилось ли значение поля данных
 CREATE FUNCTION IF NOT EXISTS diff_value AS (prev, new, op) ->
     if (
         op = 'd',
@@ -24,7 +25,7 @@ CREATE TABLE IF NOT EXISTS clients.delivery_polygons_events
     is_active Nullable(UInt8) COMMENT 'Флаг активности полигона (1 — активен)',
     created_at Nullable(DateTime64(3)) COMMENT 'Дата создания полигона в системе',
 
-    is_deleted UInt8,
+    is_deleted UInt8 COMMENT 'Была ли удалена хапись',
     ts_ms UInt64 COMMENT 'Время события CDC (epoch ms)'
 )
 ENGINE = Kafka
@@ -47,6 +48,7 @@ CREATE TABLE IF NOT EXISTS clients.delivery_shops_events
     polygon_id Nullable(UInt64) COMMENT 'Полигон доставки магазина',
     created_at Nullable(DateTime64(3)) COMMENT 'Дата создания магазина в системе',
     
+    is_deleted UInt8 COMMENT 'Была ли удалена запись',
     ts_ms UInt64 COMMENT 'Время CDC события'
 )
 ENGINE = Kafka
@@ -75,6 +77,7 @@ CREATE TABLE IF NOT EXISTS clients.delivery_couriers_events
     polygon_id Nullable(UInt64) COMMENT 'Полигон работы курьера',
     created_at Nullable(DateTime64(3)) COMMENT 'Дата создания курьера',
 
+    is_deleted UInt8 COMMENT 'Была ли удалена запись',
     ts_ms UInt64 COMMENT 'Время CDC события'
 )
 ENGINE = Kafka
@@ -101,6 +104,7 @@ CREATE TABLE IF NOT EXISTS clients.delivery_pickers_events
     shop_id Nullable(UInt64) COMMENT 'Магазин работы сборщика',
     created_at Nullable(DateTime64(3)) COMMENT 'Дата создания сборщика',
 
+    is_deleted UInt8 COMMENT 'Была ли удалена запись',
     ts_ms UInt64 COMMENT 'Время CDC'
 )
 ENGINE = Kafka
@@ -123,6 +127,7 @@ CREATE TABLE IF NOT EXISTS clients.delivery_products_events
     discount_percent Nullable(Int32) COMMENT 'Скидка в процентах',
     created_at Nullable(DateTime64(3)) COMMENT 'Дата создания товара',
 
+    is_deleted UInt8 COMMENT 'Была ли удалена запись',
     ts_ms UInt64 COMMENT 'Время CDC'
 )
 ENGINE = Kafka
@@ -142,6 +147,7 @@ CREATE TABLE IF NOT EXISTS clients.delivery_clients_events
     address Nullable(String) COMMENT 'Адрес доставки',
     created_at Nullable(DateTime64(3)) COMMENT 'Дата создания клиента',
 
+    is_deleted UInt8 COMMENT 'Была ли удалена запись',
     ts_ms UInt64 COMMENT 'Время CDC'
 )
 ENGINE = Kafka
@@ -170,6 +176,7 @@ CREATE TABLE IF NOT EXISTS clients.delivery_orders_events
     courier_take_date Nullable(DateTime64(3)),
     courier_delivered_date Nullable(DateTime64(3)),
     completed_date Nullable(DateTime64(3)),
+    is_deleted UInt8,
     ts_ms UInt64
 )
 ENGINE = Kafka
@@ -188,6 +195,7 @@ CREATE TABLE IF NOT EXISTS clients.delivery_order_products_events
     amount Nullable(Decimal(10,3)) COMMENT 'Количество товара',
     price Nullable(Decimal(10,2)) COMMENT 'Цена позиции',
 
+    is_deleted UInt8 COMMENT 'Была ли удалена запись',
     ts_ms UInt64 COMMENT 'Время CDC'
 )
 ENGINE = Kafka
@@ -210,6 +218,7 @@ CREATE TABLE IF NOT EXISTS clients.delivery_work_shifts_events
     close_reason Nullable(String) COMMENT 'Причина закрытия',
     created_at Nullable(DateTime64(3)) COMMENT 'Дата создания смены',
 
+    is_deleted UInt8 COMMENT 'Была ли удалена запись',
     ts_ms UInt64 COMMENT 'Время CDC'
 )
 ENGINE = Kafka

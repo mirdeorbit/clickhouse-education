@@ -1,11 +1,11 @@
 CREATE DATABASE IF NOT EXISTS ods
-COMMENT 'ClickHouse ODS база данных для витрин';
+COMMENT 'ClickHouse ODS (Operational Data Store) база данных для витрин';
 
 CREATE TABLE IF NOT EXISTS ods.delivery_polygons
 (
     id UInt64 COMMENT 'ID полигона',
     name String COMMENT 'Название полигона доставки',
-    city String COMMENT 'Город полигона',
+    city LowCardinality(String) COMMENT 'Город полигона',
     is_active UInt8 COMMENT 'Флаг активности полигона (1 — активен)',
     created_at DateTime64(3) COMMENT 'Дата создания полигона в системе',
 
@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS ods.delivery_polygons
     ts_ms UInt64 COMMENT 'Время события CDC (epoch ms)'
 )
 ENGINE = ReplicatedReplacingMergeTree('/ods/tables/{shard}/{database}/delivery_polygons', 'replica_{replica}', ts_ms)
-ORDER BY id
+ORDER BY id -- для join
+-- партиционирование не нужно, мало данных не будет поисков по диапазону
 COMMENT 'ODS слой полигонов доставки';
 
 
@@ -38,7 +39,7 @@ CREATE TABLE IF NOT EXISTS ods.delivery_shops
     delivery_enabled UInt8 COMMENT 'Доступна ли доставка из магазина',
     start_work_time String COMMENT 'Время открытия магазина',
     end_work_time String COMMENT 'Время закрытия магазина',
-    city String COMMENT 'Город магазина',
+    city LowCardinality(String) COMMENT 'Город магазина',
     polygon_id Nullable(UInt64) COMMENT 'Полигон доставки магазина',
     created_at DateTime64(3) COMMENT 'Дата создания магазина в системе',
 
@@ -46,7 +47,8 @@ CREATE TABLE IF NOT EXISTS ods.delivery_shops
     ts_ms UInt64 COMMENT 'Время CDC события'
 )
 ENGINE = ReplicatedReplacingMergeTree('/ods/tables/{shard}/{database}/delivery_shops', 'replica_{replica}', ts_ms)
-ORDER BY id
+ORDER BY id -- самый частый посиск по id, для join
+-- партиционирование не нужно, мало данных не будет поисков по диапазону
 COMMENT 'ODS слой магазинов доставки';
 
 
@@ -75,11 +77,11 @@ CREATE TABLE IF NOT EXISTS ods.delivery_couriers
     phone String COMMENT 'Телефон курьера',
     email Nullable(String) COMMENT 'Email курьера',
     inn Nullable(String) COMMENT 'ИНН курьера',
-    city String COMMENT 'Город работы курьера',
-    status String COMMENT 'Статус курьера (blocked/on_work/not_on_work)',
+    city LowCardinality(String) COMMENT 'Город работы курьера',
+    status LowCardinality(String) COMMENT 'Статус курьера (blocked/on_work/not_on_work)',
     company Nullable(String) COMMENT 'Компания курьера',
     self_employed UInt8 COMMENT 'Самозанятый ли курьер',
-    timezone String COMMENT 'Таймзона курьера',
+    timezone LowCardinality(String) COMMENT 'Таймзона курьера',
     polygon_id Nullable(UInt64) COMMENT 'Полигон работы курьера',
     created_at DateTime64(3) COMMENT 'Дата создания курьера',
 
@@ -87,9 +89,9 @@ CREATE TABLE IF NOT EXISTS ods.delivery_couriers
     ts_ms UInt64 COMMENT 'Время CDC события'
 )
 ENGINE = ReplicatedReplacingMergeTree('/ods/tables/{shard}/{database}/delivery_couriers', 'replica_{replica}', ts_ms)
-ORDER BY id
+ORDER BY id -- Считаем, что ищут только по id, нужно для join
+-- партиционирование не нужно, мало данных не будет поисков по диапазону
 COMMENT 'ODS слой курьеров доставки';
-
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS ods.mv_delivery_couriers
 TO ods.delivery_couriers
@@ -122,10 +124,10 @@ CREATE TABLE IF NOT EXISTS ods.delivery_pickers
     patronymic Nullable(String) COMMENT 'Отчество',
     phone String COMMENT 'Телефон',
     email Nullable(String) COMMENT 'Email',
-    status String COMMENT 'Статус (blocked/free/busy)',
+    status LowCardinality(String) COMMENT 'Статус (blocked/free/busy)',
     network String COMMENT 'Сеть работы сборщика',
-    city String COMMENT 'Город',
-    timezone String COMMENT 'Таймзона',
+    city LowCardinality(String) COMMENT 'Город',
+    timezone LowCardinality(String) COMMENT 'Таймзона',
     shop_id Nullable(UInt64) COMMENT 'Магазин работы сборщика',
     created_at DateTime64(3) COMMENT 'Дата создания сборщика',
 
@@ -133,7 +135,8 @@ CREATE TABLE IF NOT EXISTS ods.delivery_pickers
     ts_ms UInt64 COMMENT 'Время CDC'
 )
 ENGINE = ReplicatedReplacingMergeTree('/ods/tables/{shard}/{database}/delivery_pickers', 'replica_{replica}', ts_ms)
-ORDER BY id
+ORDER BY id -- Считаем, что ищем только по id, для join
+-- Партиционирование не нужно
 COMMENT 'ODS слой сборщиков заказов';
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS ods.mv_delivery_pickers
@@ -156,6 +159,7 @@ SELECT
     ts_ms
 FROM cdc.postgres_delivery_public_pickers;
 
+
 CREATE TABLE IF NOT EXISTS ods.delivery_products
 (
     id UInt64 COMMENT 'ID товара',
@@ -171,7 +175,8 @@ CREATE TABLE IF NOT EXISTS ods.delivery_products
     ts_ms UInt64 COMMENT 'Время CDC',
 )
 ENGINE = ReplicatedReplacingMergeTree('/ods/tables/{shard}/{database}/delivery_products', 'replica_{replica}', ts_ms)
-ORDER BY id
+ORDER BY id -- Считаем, что ищут только по id
+-- 5 тысяч наименований продуктов, партиционирование не нужно
 COMMENT 'ODS слой товаров';
 
 
@@ -204,7 +209,8 @@ CREATE TABLE IF NOT EXISTS ods.delivery_clients
     ts_ms UInt64 COMMENT 'Время CDC'
 )
 ENGINE = ReplicatedReplacingMergeTree('/ods/tables/{shard}/{database}/delivery_clients', 'replica_{replica}', ts_ms)
-ORDER BY id
+ORDER BY id -- Считаем, что ищут только по id, для join
+PARTITION BY toYYYYMM(created_at) -- Для аналитики, например новые клиенты за период
 COMMENT 'ODS слой клиентов доставки';
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS ods.mv_delivery_clients
@@ -225,8 +231,8 @@ FROM cdc.postgres_delivery_public_clients;
 CREATE TABLE IF NOT EXISTS ods.delivery_orders
 (
     id UInt64 COMMENT 'ID заказа',
-    city String COMMENT 'Город заказа',
-    status String COMMENT 'Статус заказа',
+    city LowCardinality(String) COMMENT 'Город заказа',
+    status LowCardinality(String) COMMENT 'Статус заказа',
     shop_id UInt64 COMMENT 'Магазин заказа',
     client_id UInt64 COMMENT 'Клиент заказа',
     picker_id Nullable(UInt64) COMMENT 'Сборщик заказа',
@@ -246,7 +252,10 @@ CREATE TABLE IF NOT EXISTS ods.delivery_orders
     ts_ms UInt64 COMMENT 'Время CDC'
 )
 ENGINE = ReplicatedReplacingMergeTree('/ods/tables/{shard}/{database}/delivery_orders', 'replica_{replica}', ts_ms)
-ORDER BY id
+-- Заказчиков чаще всего индересует статистика по заказам в разрезе времени
+-- Но также может быть применен фильтр по магазину, статусу и айдишнику
+ORDER BY (create_date, shop_id, status, id)
+PARTITION BY toYYYYMM(create_date)
 COMMENT 'ODS слой заказов доставки';
 
 
@@ -274,18 +283,20 @@ SELECT
     ts_ms
 FROM cdc.postgres_delivery_public_orders;
 
-
+-- Основной паттерн чтения из таблицы SELECT * FROM delivery_order_products WHERE order_id = ?
 CREATE TABLE IF NOT EXISTS ods.delivery_order_products
 (
     order_id UInt64 COMMENT 'ID заказа',
     product_id UInt64 COMMENT 'ID товара',
     amount Decimal(10,3) COMMENT 'Количество товара',
     price Decimal(10,2) COMMENT 'Цена позиции',
+    created_at DateTime64(3) COMMENT 'Дата создания соотношения заказ-продукт',
 
     is_deleted UInt8 COMMENT 'Soft delete',
     ts_ms UInt64 COMMENT 'Время CDC'
 )
 ENGINE = ReplicatedReplacingMergeTree('/ods/tables/{shard}/{database}/delivery_order_products', 'replica_{replica}', ts_ms)
+-- партиционирование не нужно 
 ORDER BY (order_id, product_id)
 COMMENT 'ODS слой позиций заказов';
 
@@ -318,7 +329,10 @@ CREATE TABLE IF NOT EXISTS ods.delivery_work_shifts
     ts_ms UInt64 COMMENT 'Время CDC'
 )
 ENGINE = ReplicatedReplacingMergeTree('/ods/tables/{shard}/{database}/delivery_work_shifts', 'replica_{replica}', ts_ms)
-ORDER BY id
+-- Самый частный запрос предполагаем в эту таблицу - это 
+-- WHERE start_date BETWEEN '2026-03-01' AND '2026-03-31' AND courier_id = 123
+PARTITION BY toYYYYMM(start_date)
+ORDER BY (start_date, courier_id)
 COMMENT 'ODS слой смен курьеров';
 
 
