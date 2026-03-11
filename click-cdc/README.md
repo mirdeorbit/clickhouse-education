@@ -27,9 +27,121 @@ ClickHouse Change Data Capture (CDC) проект, реализующий пот
 - `metrics` - метрики и агрегации
 
 ### Основные таблицы:
-- `clients` - данные о клиентах
-- `orders` - заказы
-- `delivery` - данные о доставке
+- `delivery_polygons` - полигоны доставки
+- `delivery_shops` - магазины
+- `delivery_couriers` - курьеры
+- `delivery_pickers` - сборщики заказов
+- `delivery_products` - товары
+- `delivery_clients` - клиенты
+- `delivery_orders` - заказы
+- `delivery_order_products` - позиции заказов
+- `delivery_work_shifts` - смены курьеров
+
+## Описание таблиц и стратегии партиционирования
+
+### База данных `cdc` (CDC слой)
+
+Таблицы в этой базе данных принимают сырые изменения из Kafka в формате Debezium.
+
+**Партиционирование**: `toYYYYMMDD(toDateTime(ts_ms / 1e6))` - по дням
+- Позволяет удалять старые данные целыми партициями через TTL
+- Оптимально для append-only workload CDC событий
+- Хранение данных ограничено TTL на 7 дней
+
+**ORDER BY**: `ts_ms`
+- Сообщения приходят в порядке времени, что минимизирует пересортировки
+- Улучшает производительность для append паттернов
+- Поддерживает хронологический анализ изменений
+
+**Таблицы CDC**:
+- `postgres_delivery_public_polygons` - изменения полигонов
+- `postgres_delivery_public_shops` - изменения магазинов
+- `postgres_delivery_public_couriers` - изменения курьеров
+- `postgres_delivery_public_pickers` - изменения сборщиков
+- `postgres_delivery_public_products` - изменения товаров
+- `postgres_delivery_public_clients` - изменения клиентов
+- `postgres_delivery_public_orders` - изменения заказов
+- `postgres_delivery_public_order_products` - изменения позиций заказов
+- `postgres_delivery_public_work_shifts` - изменения смен
+
+### База данных `clients` (Слой событий)
+
+Таблицы с двигателем `Kafka` для стриминга событий заказчику без партиционирования.
+
+**ORDER BY**: Не применимо для Kafka engine
+- Dанные транзитно проходят через этот слой
+- Используются материализованные представления для фильтрации только изменённых полей
+- `diff_value` функция определяет, какие поля действительно изменились
+
+**Таблицы clients**:
+- `delivery_*_events` - таблицы для стриминга изменений заказчику
+
+### База данных `ods` (Operational Data Store)
+
+Предназначена для аналитических запросов и JOIN операций. Использует `ReplicatedReplacingMergeTree` для хранения актуальной версии данных.
+
+#### Справочные таблицы (словари)
+
+**Партиционирование**: отсутствует
+- Небольшой объём данных (тысячи записей)
+- Поиск по диапазонам дат не требуется
+- Упрощает структуру и обслуживание
+
+**ORDER BY**: `id`
+- Самый частый паттерн - поиск по первичному ключу
+- Оптимизирует JOIN операции
+- Обеспечивает уникальность и быстрый доступ
+
+**Таблицы справочников**:
+- `delivery_polygons` - полигоны (ORDER BY id)
+- `delivery_shops` - магазины (ORDER BY id)
+- `delivery_couriers` - курьеры (ORDER BY id)
+- `delivery_pickers` - сборщики (ORDER BY id)
+- `delivery_products` - товары (ORDER BY id, ~5 тысяч товаров)
+- `delivery_order_products` - позиции заказов (ORDER BY (order_id, product_id))
+
+#### Таблицы с партиционированием по времени
+
+**Таблица**: `delivery_clients`
+- **PARTITION BY**: `toYYYYMM(created_at)`
+- **ORDER BY**: `id`
+- **Обоснование**: Аналитические запросы по периодам регистрации клиентов
+
+**Таблица**: `delivery_orders`
+- **PARTITION BY**: `toYYYYMM(create_date)`
+- **ORDER BY**: `(create_date, shop_id, status, id)`
+- **Обоснование**: 
+  - Статистика заказов в разрезе времени (основной паттерн)
+  - Фильтрация по магазину, статусу и ID (дополнительные фильтры)
+  - Композитный ORDER BY оптимизирует многомерные фильтры
+
+**Таблица**: `delivery_work_shifts`
+- **PARTITION BY**: `toYYYYMM(start_date)`
+- **ORDER BY**: `(start_date, courier_id)`
+- **Обоснование**:
+  - Основной паттерн: `WHERE start_date BETWEEN ... AND ... AND courier_id = ?`
+  - Композитный ключ оптимизирует совместную фильтрацию по дате и курьеру
+
+### База данных `metrics` (Метрики и агрегации)
+
+Предназначена для быстрой аналитики производительности.
+
+**Таблица**: `order_collecting_time`
+- **PARTITION BY**: `toYYYYMM(toDateTime(collecting_end_date))`
+- **ORDER BY**: `(city, collecting_end_date, order_id)`
+- **Обоснование**:
+  - Партиционирование по месяцам для долгосрочного хранения и удаления старых данных
+  - Группа по городам для региональной аналитики
+  - Время завершения для хронологического анализа
+  - ID для точечных запросов
+
+**Таблица**: `order_delivery_time`
+- **PARTITION BY**: `toYYYYMM(toDateTime(courier_delivered_date))`
+- **ORDER BY**: `(city, courier_delivered_date, order_id)`
+- **Обоснование**:
+  - Аналогично заказам с фокусом на время доставки
+  - Группа по городам для сравнения метрик между регионами
+  - Хронологический порядок для трендового анализа
 
 ## Развертывание
 
