@@ -13,18 +13,16 @@ async function getIds(client, tableName) {
   return res.rows.map(row => row.id);
 }
 
-async function getAvailablePicker(client, shopId) {
+async function getAvailablePicker(client) {
   const res = await client.query(
-    `SELECT id FROM pickers WHERE shop_id = $1 AND (status = 'free' OR $1 IS NULL) LIMIT 1`,
-    [shopId]
+    `SELECT id FROM pickers ORDER BY RANDOM() LIMIT 1`
   );
   return res.rows.length > 0 ? res.rows[0].id : null;
 }
 
-async function getAvailableCourier(client, polygonId) {
+async function getAvailableCourier(client) {
   const res = await client.query(
-    `SELECT id FROM couriers WHERE polygon_id = $1 AND (status = 'on_work' OR $1 IS NULL) LIMIT 1`,
-    [polygonId]
+    `SELECT id FROM couriers ORDER BY RANDOM() LIMIT 1`,
   );
   return res.rows.length > 0 ? res.rows[0].id : null;
 }
@@ -113,6 +111,6 @@ async function processOrders({
 }
 
 processOrders({
-  batchSize: 5,
-  intervalMs: 2000,
+  batchSize: 10000,
+  intervalMs: 5000,
 });

@@ -1,6 +1,6 @@
 apiVersion: v1
 name: debezium
-version: 1.0.300
+version: 1.0.393
 description: Chart for kafka debezium deploy
-appVersion: "1.0.300"
+appVersion: "1.0.393"
 deprecated: false

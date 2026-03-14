@@ -26,8 +26,6 @@ spec:
     transforms: flatten
     transforms.flatten.type: org.apache.kafka.connect.transforms.Flatten$Value
     transforms.flatten.delimiter: "."
-    # Пишем только один раз
-    exactlyOnce: true
     # Объединяем ли сообщения из разных partition в один batch
     ignorePartitionsWhenBatching: false
     # Максимальное еоличесто записей, которое может быть передано в коннектор за один запрос

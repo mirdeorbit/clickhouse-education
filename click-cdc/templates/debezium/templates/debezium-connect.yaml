@@ -10,9 +10,9 @@ spec:
   replicas: 1
   resources:
     limits:
-      memory: 2Gi
+      memory: 8Gi
     requests:
-      memory: 1Gi
+      memory: 4Gi
   bootstrapServers: {{.Values.listeners.plain.host}}:{{.Values.listeners.plain.port}}
   groupId: connect-cluster
   offsetStorageTopic: connect-cluster-offsets

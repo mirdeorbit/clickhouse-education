@@ -66,3 +66,7 @@ clickhouse:
     - name: clickhouse-initdb
       configMap:
         name: clickhouse-initdb
+  persistence:
+    enabled: true
+    storageClass: clickhouse-local
+    size: 8Gi

@@ -258,6 +258,12 @@ ORDER BY (create_date, shop_id, status, id)
 PARTITION BY toYYYYMM(create_date)
 COMMENT 'ODS слой заказов доставки';
 
+-- высокая кардинальность поля, поэтому bloom, но помогает он слабо
+ALTER TABLE ods.delivery_orders
+ADD INDEX IF NOT EXISTS idx_courier courier_id TYPE bloom_filter GRANULARITY 4;
+
+ALTER TABLE ods.delivery_orders
+ADD INDEX IF NOT EXISTS idx_picker picker_id TYPE bloom_filter GRANULARITY 4;
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS ods.mv_delivery_orders
 TO ods.delivery_orders

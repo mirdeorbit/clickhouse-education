@@ -36,8 +36,35 @@ fi
 PARENT_DIR_NAME=$(basename $(dirname $PWD))
 MINIKUBE_HOME=${PARENT_DIR_NAME}/config/kube
 
+DIRS=(
+  /tmp/minikube/clickhouse/shard0
+  /tmp/minikube/clickhouse/shard1
+  /tmp/minikube/kafka/replica0
+  /tmp/minikube/kafka/replica1
+  /tmp/minikube/kafka/replica2
+)
+
+for DIR in "${DIRS[@]}"; do
+  if [ ! -d "$DIR" ]; then
+    echo "Creating $DIR"
+    mkdir -p "$DIR"
+  else
+    echo "$DIR already exists"
+  fi
+
+  echo "Cleaning contents of $DIR"
+  
+  rm -rf "${DIR:?}/"*
+
+  echo "Setting permissions on $DIR"
+  chmod -Rf 777 "$DIR"
+done
+
+echo "Done creation directories..."
+
 echo "Starting cluster..."
-minikube start
+
+minikube start --memory 16384 --mount-string="/tmp/minikube:/tmp/minikube" --mount
 
 STRIMZI_VERSION="0.51.0"
 KAFKA_VERSION="4.1.1"
@@ -55,8 +82,7 @@ minikube image load quay.io/strimzi/kafka:${STRIMZI_VERSION}-kafka-${KAFKA_VERSI
 minikube image load docker.io/mirdeorbit/debezium-connect:1.7.10
 
 
-
 echo "Upgrading strimzi operator..."
-helm delete strimzi-cluster-operator
+helm delete strimzi-cluster-operator | true
 sleep 7
 helm upgrade --install strimzi-cluster-operator oci://quay.io/strimzi-helm/strimzi-kafka-operator --set defaultImageTag=${STRIMZI_VERSION} --version ${STRIMZI_VERSION}

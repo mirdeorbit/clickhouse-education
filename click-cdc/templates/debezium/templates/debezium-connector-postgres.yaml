@@ -27,3 +27,10 @@ spec:
     table.include.list: {{ .Values.tablesList }}
     # В кафку дробные значения пишутся как строки
     decimal.handling.mode: string
+    # ~ 5 гигабайт, так как топики быстро переполняются
+    topic.creation.default.retention.bytes: 5000000000
+    topic.creation.default.replication.factor: 2  
+    topic.creation.default.partitions: 10
+    topic.creation.default.cleanup.policy: delete
+    # Проверяем каждые 10 секунд
+    log.retention.check.interval.ms: 10000

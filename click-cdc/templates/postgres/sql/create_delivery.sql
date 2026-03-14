@@ -36,11 +36,11 @@ CREATE TABLE IF NOT EXISTS shops (
     end_work_time TIME NOT NULL,
     city VARCHAR(100) NOT NULL,
     polygon_id INTEGER,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 
-    CONSTRAINT fk_shops_polygon
-        FOREIGN KEY (polygon_id) REFERENCES polygons(id)
-        ON DELETE SET NULL
+    -- CONSTRAINT fk_shops_polygon
+    --     FOREIGN KEY (polygon_id) REFERENCES polygons(id)
+    --     ON DELETE SET NULL
 );
 
 ALTER TABLE shops OWNER TO REPLICATION_GROUP;
@@ -59,20 +59,20 @@ CREATE TABLE IF NOT EXISTS couriers (
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     patronymic VARCHAR(100),
-    phone VARCHAR(20) NOT NULL UNIQUE,
-    email VARCHAR(255) UNIQUE,
-    inn VARCHAR(20) UNIQUE,
+    phone VARCHAR(20) NOT NULL,
+    email VARCHAR(255),
+    inn VARCHAR(20),
     city VARCHAR(100) NOT NULL,
     status VARCHAR(20) NOT NULL CHECK (status IN ('blocked', 'on_work', 'not_on_work')),
     company VARCHAR(255),
     self_employed BOOLEAN NOT NULL DEFAULT FALSE,
     timezone VARCHAR(50) NOT NULL,
     polygon_id INTEGER,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 
-    CONSTRAINT fk_courier_polygon
-        FOREIGN KEY (polygon_id) REFERENCES polygons(id)
-        ON DELETE SET NULL
+    -- CONSTRAINT fk_courier_polygon
+    --     FOREIGN KEY (polygon_id) REFERENCES polygons(id)
+    --     ON DELETE SET NULL
 );
 
 ALTER TABLE couriers OWNER TO REPLICATION_GROUP;
@@ -98,18 +98,18 @@ CREATE TABLE IF NOT EXISTS pickers (
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     patronymic VARCHAR(100),
-    phone VARCHAR(20) NOT NULL UNIQUE,
+    phone VARCHAR(20) NOT NULL,
     email VARCHAR(255),
     status VARCHAR(20) NOT NULL CHECK (status IN ('blocked', 'free', 'busy')),
     network VARCHAR(30) NOT NULL CHECK (network IN ('asx', 'self_delivery', 'otus_logistics')),
     city VARCHAR(100) NOT NULL,
     timezone VARCHAR(50) NOT NULL,
     shop_id INTEGER,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 
-    CONSTRAINT fk_picker_shop
-        FOREIGN KEY (shop_id) REFERENCES shops(id)
-        ON DELETE SET NULL
+    -- CONSTRAINT fk_picker_shop
+    --     FOREIGN KEY (shop_id) REFERENCES shops(id)
+    --     ON DELETE SET NULL
 );
 
 ALTER TABLE pickers OWNER TO REPLICATION_GROUP;
@@ -177,23 +177,23 @@ CREATE TABLE IF NOT EXISTS orders (
     courier_assigned_date TIMESTAMP,
     courier_take_date TIMESTAMP,
     courier_delivered_date TIMESTAMP,
-    completed_date TIMESTAMP,
+    completed_date TIMESTAMP
 
-    CONSTRAINT fk_order_client
-        FOREIGN KEY (client_id) REFERENCES clients(id)
-        ON DELETE RESTRICT,
+    -- CONSTRAINT fk_order_client
+    --     FOREIGN KEY (client_id) REFERENCES clients(id)
+    --     ON DELETE RESTRICT,
 
-    CONSTRAINT fk_order_shop
-        FOREIGN KEY (shop_id) REFERENCES shops(id)
-        ON DELETE RESTRICT,
+    -- CONSTRAINT fk_order_shop
+    --     FOREIGN KEY (shop_id) REFERENCES shops(id)
+    --     ON DELETE RESTRICT,
 
-    CONSTRAINT fk_order_picker
-        FOREIGN KEY (picker_id) REFERENCES pickers(id)
-        ON DELETE SET NULL,
+    -- CONSTRAINT fk_order_picker
+    --     FOREIGN KEY (picker_id) REFERENCES pickers(id)
+    --     ON DELETE SET NULL,
 
-    CONSTRAINT fk_order_courier
-        FOREIGN KEY (courier_id) REFERENCES couriers(id)
-        ON DELETE SET NULL
+    -- CONSTRAINT fk_order_courier
+    --     FOREIGN KEY (courier_id) REFERENCES couriers(id)
+    --     ON DELETE SET NULL
 );
 
 ALTER TABLE orders OWNER TO REPLICATION_GROUP;
@@ -215,15 +215,15 @@ CREATE TABLE IF NOT EXISTS order_products (
     price NUMERIC(10,2) NOT NULL CHECK (price >= 0),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 
-    PRIMARY KEY (order_id, product_id),
+    PRIMARY KEY (order_id, product_id)
 
-    CONSTRAINT fk_op_order
-        FOREIGN KEY (order_id) REFERENCES orders(id)
-        ON DELETE CASCADE,
+    -- CONSTRAINT fk_op_order
+    --     FOREIGN KEY (order_id) REFERENCES orders(id)
+    --     ON DELETE CASCADE,
 
-    CONSTRAINT fk_op_product
-        FOREIGN KEY (product_id) REFERENCES products(id)
-        ON DELETE RESTRICT
+    -- CONSTRAINT fk_op_product
+    --     FOREIGN KEY (product_id) REFERENCES products(id)
+    --     ON DELETE RESTRICT
 );
 
 ALTER TABLE order_products OWNER TO REPLICATION_GROUP;
@@ -243,11 +243,11 @@ CREATE TABLE IF NOT EXISTS work_shifts (
     close_reason VARCHAR(50) CHECK (
         close_reason IN ('successful_done', 'courier_didnt_come_out', 'cancelled_by_manager')
     ),
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 
-    CONSTRAINT fk_shift_courier
-        FOREIGN KEY (courier_id) REFERENCES couriers(id)
-        ON DELETE CASCADE
+    -- CONSTRAINT fk_shift_courier
+    --     FOREIGN KEY (courier_id) REFERENCES couriers(id)
+    --     ON DELETE CASCADE
 );
 
 ALTER TABLE work_shifts OWNER TO REPLICATION_GROUP;

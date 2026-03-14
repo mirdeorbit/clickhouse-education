@@ -1,0 +1,1 @@
+kubectl port-forward service/click-cdc-clickhouse-headless 8123:8123 &

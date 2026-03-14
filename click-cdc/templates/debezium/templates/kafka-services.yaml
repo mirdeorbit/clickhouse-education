@@ -12,7 +12,9 @@ spec:
     - broker
     - controller
   storage:
-    type: ephemeral
+    type: persistent-claim
+    size: 10Gi
+    class: kafka-local
   resources:
     requests:
       memory: 1Gi
