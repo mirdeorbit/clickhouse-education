@@ -27,14 +27,16 @@ spec:
     transforms.flatten.type: org.apache.kafka.connect.transforms.Flatten$Value
     transforms.flatten.delimiter: "."
     # Объединяем ли сообщения из разных partition в один batch
-    ignorePartitionsWhenBatching: false
+    ignorePartitionsWhenBatching: true
+    exactlyOnce: false
     # Максимальное еоличесто записей, которое может быть передано в коннектор за один запрос
-    # один цикл чтения из Kafka даст максимум 10000 сообщений.
-    consumer.max.poll.records: 10000
+    # один цикл чтения из Kafka даст максимум 50000 сообщений.
+    consumer.override.max.poll.records: 500000
     # Максимальный размер данных, который консьюмер может получить из одной партиции за один fetch.
     # Если сообщение больше — Kafka всё равно его отдаст.
-    consumer.max.partition.fetch.bytes: 5242880
-    # Kafka не отдаст данные, пока не накопится минимум 1MB сообщений.
-    consumer.fetch.min.bytes: 1048576
+    consumer.override.max.partition.fetch.bytes: 500000000
+    # Kafka не отдаст данные, пока не накопится минимум 100MB сообщений.
+    consumer.fetch.min.bytes: 100000000
     # Максимальное время ожидания Kafka, чтобы накопить fetch.min.bytes.
-    consumer.fetch.max.wait.ms: 500
+    consumer.fetch.max.wait.ms: 300
+    clickhouseSettings: "insert_quorum=2,insert_quorum_timeout=60000"

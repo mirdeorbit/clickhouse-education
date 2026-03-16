@@ -21,10 +21,8 @@ spec:
   logging:
     type: inline
     loggers:
-      rootLogger.level: WARN
-      logger.kafka.level: WARN
-      logger.logcleaner.level: WARN
-      logger.authorizer.level: WARN
+      rootLogger.level: INFO
+      logger.reflections.level: INFO
   config:
     config.providers: secrets
     config.providers.secrets.class: io.strimzi.kafka.KubernetesSecretConfigProvider

@@ -258,7 +258,10 @@ ENGINE = ReplicatedMergeTree(
 )
 PARTITION BY toYYYYMMDD(toDateTime(ts_ms / 1e6))
 ORDER BY (ts_ms)
-COMMENT 'CDC source data table for topic postgres.public.orders';
+COMMENT 'CDC source data table for topic postgres.public.orders'
+SETTINGS
+    max_insert_threads = 4,
+    insert_quorum = 2;
 
 
 CREATE TABLE IF NOT EXISTS cdc.postgres_delivery_public_order_products

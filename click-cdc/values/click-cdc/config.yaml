@@ -10,6 +10,7 @@ authCredentials:
 kafkaServer: kafka-debezium-cluster-kafka-bootstrap.default.svc:9092
 
 clickhouse:
+  logLevel: debug
   image:
     registry: docker.io
     repository: bitnamilegacy/clickhouse
@@ -17,9 +18,9 @@ clickhouse:
     pullPolicy: Never
   resources:
     limits:
-      memory: 4Gi
+      memory: 8Gi
     requests:
-      memory: 2Gi
+      memory: 6Gi
   nameOverride: "clickhouse"
   fullNameOverride: "clickhouse"
   shards: 1
@@ -33,6 +34,10 @@ clickhouse:
       registry: docker.io
       repository: bitnamilegacy/clickhouse-keeper
       tag: 25.7.5-debian-12-r0
+    persistence:
+      enabled: true
+      storageClass: clickhouse-local-keeper
+      size: 8Gi
   containerPorts:
     http: 8123
   auth:

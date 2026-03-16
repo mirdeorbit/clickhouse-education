@@ -39,6 +39,7 @@ MINIKUBE_HOME=${PARENT_DIR_NAME}/config/kube
 DIRS=(
   /tmp/minikube/clickhouse/shard0
   /tmp/minikube/clickhouse/shard1
+  /tmp/minikube/clickhouse/keeper
   /tmp/minikube/kafka/replica0
   /tmp/minikube/kafka/replica1
   /tmp/minikube/kafka/replica2
@@ -83,6 +84,4 @@ minikube image load docker.io/mirdeorbit/debezium-connect:1.7.10
 
 
 echo "Upgrading strimzi operator..."
-helm delete strimzi-cluster-operator | true
-sleep 7
 helm upgrade --install strimzi-cluster-operator oci://quay.io/strimzi-helm/strimzi-kafka-operator --set defaultImageTag=${STRIMZI_VERSION} --version ${STRIMZI_VERSION}

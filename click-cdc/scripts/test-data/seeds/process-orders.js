@@ -27,6 +27,10 @@ async function getAvailableCourier(client) {
   return res.rows.length > 0 ? res.rows[0].id : null;
 }
 
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
 async function processOrders({
   batchSize = 5,
   intervalMs = 2000,
@@ -36,10 +40,10 @@ async function processOrders({
   try {
     while (true) {
       const orders = await client.query(
-        `SELECT o.id, o.status, o.shop_id, s.polygon_id
+        `SELECT o.id, o.status, o.shop_id, s.polygon_id, o.courier_take_date
          FROM orders o
          JOIN shops s ON o.shop_id = s.id
-         WHERE o.status IN ('created', 'collecting', 'collected', 'delivering')
+         WHERE o.status IN ('delivering')
          LIMIT $1`,
         [batchSize]
       );
@@ -94,7 +98,7 @@ async function processOrders({
         } else if (order.status === 'delivering') {
           await client.query(
             `UPDATE orders SET status = 'delivered', courier_delivered_date = $1 WHERE id = $2`,
-            [now, order.id]
+            [new Date(order.courier_take_date.getTime() + getRandomArbitrary(1, 24) * 60 * 60 * 1000), order.id]
           );
           console.log(`Order ${order.id}: delivering -> delivered`);
         }

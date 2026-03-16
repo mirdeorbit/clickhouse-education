@@ -15,7 +15,7 @@ function getRandomInt(max) {
 }
 
 const CITIES = ['Moscow', 'Saint Petersburg', 'Kazan', 'Novosibirsk', 'Yekaterinburg'];
-const ORDER_STATUS = ['created', 'collecting', 'collected', 'delivering', 'delivered', 'completed'];
+const ORDER_STATUS = [/*'created', 'collecting',*/ 'collected', 'delivering', 'delivered', 'completed'];
 
 const randomCity = () => faker.helpers.arrayElement(CITIES);
 const randomString = (length = 8) => faker.string.alpha({ count: length, casing: 'mixed' }).toUpperCase();
@@ -262,6 +262,10 @@ async function ensureProducts(client, numProducts = 30) {
   return allProducts;
 }
 
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
 async function seedOrders({
   numOrdersPerDay = 60000,
   numDays = 60,
@@ -275,20 +279,20 @@ async function seedOrders({
 }) {
   const client = await pool.connect();
 
-  console.log('delete clients...')
-  await client.query(`DELETE FROM polygons`);
-  console.log('delete clients...');
-  await client.query(`DELETE FROM clients`);
-  console.log('delete pickers...');
-  await client.query(`DELETE FROM pickers`);
-  console.log('delete couriers...');
-  await client.query(`DELETE FROM couriers`);
-  console.log('delete orders...');
-  await client.query(`DELETE FROM orders`);
-  console.log('delete products...');
-  await client.query(`DELETE FROM products`);
-  console.log('delete shops...');
-  await client.query(`DELETE FROM shops`);
+  // console.log('delete clients...')
+  // await client.query(`DELETE FROM polygons`);
+  // console.log('delete clients...');
+  // await client.query(`DELETE FROM clients`);
+  // console.log('delete pickers...');
+  // await client.query(`DELETE FROM pickers`);
+  // console.log('delete couriers...');
+  // await client.query(`DELETE FROM couriers`);
+  // console.log('delete orders...');
+  // await client.query(`DELETE FROM orders`);
+  // console.log('delete products...');
+  // await client.query(`DELETE FROM products`);
+  // console.log('delete shops...');
+  // await client.query(`DELETE FROM shops`);
 
   try {
     const polygonIds = await ensurePolygons(client, numPolygons);
@@ -298,11 +302,11 @@ async function seedOrders({
     const courierIds = await ensureCouriers(client, polygonIds, numCouriers);
     const productIds = await ensureProducts(client, numProducts);
 
-    let startDate = new Date('2022-01-01T00:00:00');
+    let startDate = new Date('2024-07-01T00:00:00');
 
     for (let dayIndex = 0; dayIndex < numDays; dayIndex++) {
       const dayStart = new Date(startDate.getTime() + dayIndex * 86400000);
-      const BATCH_SIZE = 100;
+      const BATCH_SIZE = 3000;
       
       const orderGroups = {
         created: [],
@@ -326,10 +330,10 @@ async function seedOrders({
         const createDate = new Date(dayStart.getTime() + offsetInSeconds * 1000);
 
         const collectingStart = new Date(createDate.getTime() + 86400000);
-        const collectingEnd = new Date(collectingStart.getTime() + 86400000);
+        const collectingEnd = new Date(collectingStart.getTime() + getRandomArbitrary(1, 24) * 60 * 60 * 1000);
         const courierAssigned = new Date(collectingEnd.getTime() + 86400000);
         const courierTake = new Date(courierAssigned.getTime() + 86400000);
-        const courierDelivered = new Date(courierTake.getTime() + 86400000);
+        const courierDelivered = new Date(courierTake.getTime() + getRandomArbitrary(1, 24) * 60 * 60 * 1000);
         const completed = new Date(courierDelivered.getTime() + 86400000);
 
         if (status === 'created') {
@@ -368,6 +372,8 @@ async function seedOrders({
           for (const order of batch) {
             params.push(...order);
           }
+
+          // console.log(columns, values, params, params.length, values.length);
           
           await client.query(
             `INSERT INTO orders (${columns.join(', ')}) VALUES ${values.join(', ')}`,
@@ -385,9 +391,9 @@ async function seedOrders({
       
       console.log(`Day ${dayIndex + 1}/${numDays} created (${numOrdersPerDay} orders, start: ${dayStart.toISOString()})`);
 
-      if (dayIndex < numDays - 1) {
-        await new Promise((resolve) => setTimeout(resolve, delayMs));
-      }
+      // if (dayIndex < numDays - 1) {
+      //   await new Promise((resolve) => setTimeout(resolve, delayMs));
+      // }
     }
 
     console.log('Orders seeding completed!');
@@ -400,8 +406,8 @@ async function seedOrders({
 }
 
 seedOrders({
-  numOrdersPerDay: 60000,
-  numDays: 60,
+  numOrdersPerDay: 100000,
+  numDays: 365,
   delayMs: 2000,
   numPolygons: 100_000,
   numShops: 100_000,

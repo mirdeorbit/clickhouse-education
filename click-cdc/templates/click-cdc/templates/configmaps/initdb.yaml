@@ -12,4 +12,4 @@ data:
   init_clients_mvs.sql: |
 {{- tpl (.Files.Get "sql/create_clients_mvs.sql") . | nindent 4 }}
   init_metrics.sql: |
-{{- tpl (.Files.Get "sql/create_metrics.sql") . | nindent 4 }} 
+{{- tpl (.Files.Get "sql/create_metrics.sql") . | nindent 4 }}
